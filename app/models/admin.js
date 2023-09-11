@@ -19,6 +19,14 @@ module.exports = (sequelize, Sequelize) => {
       adminType: {
         type: Sequelize.ENUM("super_admin", "admin"),
         defaultValue: "admin"
+      },
+      superAdmin: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false
+      },
+      active: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false
       }
     },
     {

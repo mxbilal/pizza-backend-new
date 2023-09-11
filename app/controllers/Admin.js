@@ -8,39 +8,26 @@ const { errorHandler } = require("./errHandler");
 const admins = db.admins;
 /*************************** **************************/
 // create token on admin
-// const createToken = async (admin) => {
-//   try {
-//     //generate access token
-//     const token = jwt.sign({ id: admin.id }, process.env.JWT_TOKEN_KEY, {
-//       expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
-//     });
-//     //generate refresh token
-//     const refreshToken = jwt.sign(
-//       { id: admin.id },
-//       process.env.JWT_REFRESH_TOKEN_KEY
-//     );
-
-//     //insert the token in database adminsessions table.
-//     let adminSession = await db.adminSessions.create({
-//       userId: admin?.id,
-//       refreshToken: refreshToken,
-//     });
-
-//     if (adminSession) {
-//       console.log("adminSession", adminSession);
-//       return {
-//         accessToken: token,
-//         refreshToken: refreshToken,
-//       };
-//     } else {
-//       return { not_created: "tokens not added in." };
-//     }
-//     // save user token
-//   } catch (err) {
-//     console.log("error", err);
-//     return { error: true };
-//   }
-// };
+const createToken = async (admin) => {
+  try {
+    //generate access token
+    const token = jwt.sign({ id: admin.id }, process.env.JWT_TOKEN_KEY, {
+      expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
+    });
+    //generate refresh token
+    const refreshToken = jwt.sign(
+      { id: admin.id },
+      process.env.JWT_REFRESH_TOKEN_KEY
+    );
+    return {
+      accessToken: token,
+      refreshToken: refreshToken,
+    };
+  } catch (err) {
+    console.log("error", err);
+    return { error: true };
+  }
+};
 
 // create code for admin email verification
 // const makeCode = async () => {
@@ -108,11 +95,12 @@ exports.login = async (req, res, next) => {
   try {
     const email = req?.body?.email?.trim?.();
     const password = req?.body?.password?.trim?.();
-
     if (email && password) {
       let adminData = await admins.findOne({
         where: {
           email: email,
+          active: true,
+          superAdmin: false
         },
         raw: true,
       });
@@ -148,7 +136,7 @@ exports.login = async (req, res, next) => {
     }
   } catch (err) {
     console.log("error", err);
-    res.send(errorHandler[503])
+    res.send(errorHandler["503"])
   }
 };
 
@@ -437,16 +425,23 @@ exports.createAdmin = async (req, res) => {
   try {
     // Extract admin data from the request body
     const { firstName, lastName, email, password } = req.body;
-
-    // Create a new admin using Sequelize
-    const admin = await admins.create({
-      firstName,
-      lastName,
-      email,
-      password,
-    });
-
-    res.status(201).json({ data: admin });
+    if((!firstName && !lastName) || !email || !password)
+      res.send(errorHandler[400])
+    else {
+      let hashedPassword = bcrypt.hashSync(
+        password,
+        parseInt(process.env.BCRYPT_SALT)
+      );
+  
+      // Create a new admin using Sequelize
+      const admin = await admins.create({
+        firstName,
+        lastName,
+        email,
+        password: hashedPassword,
+      });
+      res.status(201).json({ data: admin });
+    }
   } catch (error) {
     console.error(error);
     res.send(errorHandler[500]);
@@ -454,26 +449,24 @@ exports.createAdmin = async (req, res) => {
 }
 exports.status = async (req, res) => {
   try {
-    const { id } = req.params;
-    const { status } = req.body;
+    const { id, status } = req.query;
 
     // Find the admin by ID
-    const admin = await admins.findByPk(id);
-
-    if (!admin) {
-      return res.status(404).json({ error: 'Admin not found' });
-    }
-
-    admin.status = status;
-    await admin.save();
-
+    const admin = await admins.update({
+      active: status
+    },{
+      where: {
+        id
+      }
+    });
+    console.log(admin)
     res.json({ data: admin });
   } catch (error) {
     console.error(error);
     res.send(errorHandler[500]);
   }
 }
-exports.delete = async (req, res) => {
+exports.deleteAdmin = async (req, res) => {
   try {
     const { id } = req.params;
 
