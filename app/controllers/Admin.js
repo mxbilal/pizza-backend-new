@@ -2,7 +2,7 @@ const db = require("../models");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
-// var nodemailer = require("nodemailer");
+var nodemailer = require("nodemailer");
 const { errorHandler } = require("./errHandler");
 // const adminSession = require('../models/AdminSession');
 const admins = db.admins;
@@ -30,69 +30,91 @@ const createToken = async (admin) => {
 };
 
 // create code for admin email verification
-// const makeCode = async () => {
-//   try {
-//     var text = "";
-//     var possible = "0123456789";
-//     let notExist = true;
-//     do {
-//       for (var i = 0; i < 4; i++) {
-//         text += possible.charAt(Math.floor(Math.random() * possible.length));
-//       }
-//       let resetCode = await db.adminResetCodes.findOne({
-//         where: {
-//           resetCode: text,
-//         },
-//         raw: true,
-//       });
-//       console.log("resetCode", resetCode);
-//       if (!resetCode) {
-//         notExist = false;
-//       }
-//     } while (notExist);
-//     return text;
-//   } catch (err) {
-//     console.log("error", err);
-//     return { error: true };
-//   }
-// };
+const makeCode = async () => {
+  try {
+    var text = "";
+    var possible = "0123456789";
+    let notExist = true;
+    do {
+      for (var i = 0; i < 6; i++) {
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+      }
+      let resetCode = await db.admins.findOne({
+        where: {
+          code: text,
+        },
+        raw: true,
+      });
+      console.log("resetCode", resetCode);
+      if (!resetCode) {
+        notExist = false;
+      }
+    } while (notExist);
+    return text;
+  } catch (err) {
+    console.log("error", err);
+    return { error: true };
+  }
+};
 
 //send email of forget password
-// const forgetPasswordEmail = (toUser, emailSubject, emailMessage) => {
-//   try {
-//     return new Promise((resolve, reject) => {
-//       var transporter = nodemailer.createTransport({
-//         service: "gmail",
-//         auth: {
-//           user: "harisbakhabarpk@gmail.com",
-//           pass: "cfivxreljrvzlqrt",
-//         },
-//       });
-
-//       var mailOptions = {
-//         from: "harisbakhabarpk@gmail.com",
-//         to: toUser,
-//         subject: emailSubject,
-//         text: emailMessage,
-//       };
-
-//       let value = transporter.sendMail(mailOptions, function (error, info) {
-//         if (error) {
-//           console.log(error);
-//         } else {
-//           console.log("Email sent: " + info.response);
-//           resolve(true);
-//         }
-//       });
-//     });
-//   } catch (err) {
-//     console.log("error", err);
-//     return { error: true };
-//   }
-// };
+exports.forgetPassword = async(req, res) => {
+  try {
+    let { email } = req?.body;
+    let adminExists = await db.admins.findOne({
+      where: {
+        email
+      }
+    })
+    console.log("---------[forgetPassword]----------", adminExists)
+    if(adminExists) {
+      var transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+          user: "harisbakhabarpk@gmail.com",
+          pass: "cfivxreljrvzlqrt",
+        },
+      });
+      let code = await makeCode();
+      if(!code.error){
+        var mailOptions = {
+          from: "harisbakhabarpk@gmail.com",
+          to: adminExists?.email,
+          subject: "Forget Password",
+          text: code,
+        };
+    
+        transporter.sendMail(mailOptions, function (error, info) {
+          if (error) {
+            console.log(error);
+          } else {
+            console.log("Email sent: " + info.response);
+            db.admins.update({
+              code
+            }, {
+              where: {
+                id: adminExists?.id
+              }
+            }).then(()=> {
+              res.status(200).send({success: true, message: "code is sent to your email."});
+            })
+          }
+        });
+      } else {
+        res.send(errorHandler[400]);
+      }
+    } else {
+      res.send(errorHandler[400]);
+    }
+  } catch (err) {
+    console.log("error", err);
+    res.send(errorHandler[500]);
+  }
+};
 /*********************** *********************/
 exports.login = async (req, res, next) => {
   try {
+    console.log("admin login")
     const email = req?.body?.email?.trim?.();
     const password = req?.body?.password?.trim?.();
     if (email && password) {
@@ -352,64 +374,46 @@ exports.login = async (req, res, next) => {
 // };
 
 // update password after email for admin.
-// exports.updatePassword = async (req, res, next) => {
-//   try {
-//     let verificationCode = req?.body?.code;
-//     let password = req?.body?.password?.trim();
-//     let hashedPassword = bcrypt.hashSync(
-//       password,
-//       parseInt(process.env.BCRYPT_SALT)
-//     );
-//     let userData = await db.adminResetCodes.findOne({
-//       where: {
-//         resetCode: verificationCode,
-//       },
-//       raw: true,
-//     });
-//     if (userData) {
-//       let updatedRows = await admins.update(
-//         {
-//           password: hashedPassword,
-//         },
-//         {
-//           where: {
-//             id: userData?.userId,
-//           },
-//         }
-//       );
-//       console.log("updatedRows", updatedRows);
-//       if (updatedRows[0] > 0) {
-//         // db.adminResetCodes.findOne({
-//         // 	where: {
-//         // 		resetCode: verificationCode
-//         // 	},
-//         // 	raw: true
-//         // }).then(data => {
-//         // 	console.log("data", data)
-//         // 	data.destroy();
-//         // 	res.status(200).send("password update.")
-//         // })
-//         await db.adminResetCodes.destroy({
-//           where: {
-//             resetCode: verificationCode,
-//           },
-//         });
-//         res.status(200).send({ success: true, message: "password update." });
-//       } else {
-//         res
-//           .status(400)
-//           .send({ success: false, message: "could not reset password." });
-//       }
-//     } else {
-//       res
-//         .status(400)
-//         .send({ success: false, message: "this code is not valid." });
-//     }
-//   } catch (err) {
-//     console.log("error", err);
-//     res.status(503).send({ success: false, message: "Server Error." });
-//   }
-// };
+exports.updatePassword = async (req, res, next) => {
+  try {
+    let { code, password } = req?.body;
+    let hashedPassword = bcrypt.hashSync(
+      password,
+      parseInt(process.env.BCRYPT_SALT)
+    );
+    let userData = await db.admins.findOne({
+      where: {
+        code,
+      },
+      raw: true,
+    });
+    console.log("-------[userData]-------", userData)
+    if (userData) {
+      let updatedRows = await admins.update(
+        {
+          password: hashedPassword,
+          code: null
+        },
+        {
+          where: {
+            id: userData?.id,
+          },
+        }
+      );
+      console.log("updatedRows", updatedRows);
+      if (updatedRows[0] > 0) {
+        res.status(200).send({ success: true, message: "password update." });
+      } else {
+        res.send(errorHandler[400])
+      }
+    } else {
+      res.send(errorHandler[400])
+    }
+  } catch (err) {
+    console.log("error", err);
+    res.send(errorHandler[500])
+  }
+}
 
 
 exports.getAdmins = async (req, res) => {
