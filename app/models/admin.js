@@ -32,6 +32,10 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.STRING,
         allowNull: true,
         defaultValue: null
+      },
+      twoFactorEnabled: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: true
       }
     },
     {

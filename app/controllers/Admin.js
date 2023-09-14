@@ -71,14 +71,14 @@ exports.forgetPassword = async(req, res) => {
       var transporter = nodemailer.createTransport({
         service: "gmail",
         auth: {
-          user: "harisbakhabarpk@gmail.com",
-          pass: "cfivxreljrvzlqrt",
+          user: process.env.SENDER_EMAIL,
+          pass: process.env.SENDER_PASS,
         },
       });
       let code = await makeCode();
       if(!code.error){
         var mailOptions = {
-          from: "harisbakhabarpk@gmail.com",
+          from: process.env.SENDER_EMAIL,
           to: adminExists?.email,
           subject: "Forget Password",
           text: code,
@@ -131,21 +131,58 @@ exports.login = async (req, res, next) => {
         let hash = adminData?.password;
         let result = bcrypt.compareSync(password, hash);
         if (result) {
-          let tokens = await createToken(adminData);
-          if (!tokens?.not_created && !tokens.error) {
-            res.status(200).send({
-              adminId: adminData?.id,
-              adminEmail: adminData?.email,
-              firstName: adminData?.firstName,
-              lastName: adminData?.lastName,
-              tokens: tokens,
+          if(adminData?.twoFactorEnabled){
+            var transporter = nodemailer.createTransport({
+              service: "gmail",
+              auth: {
+                user: process.env.SENDER_EMAIL,
+                pass: process.env.SENDER_PASS,
+              },
             });
-          } else if (tokens?.not_created) {
-            res.send(errorHandler[400])
-          } else if (tokens?.error) {
-            res.send(errorHandler[503])
+            let code = await makeCode();
+            if(!code.error){
+              var mailOptions = {
+                from: process.env.SENDER_EMAIL,
+                to: adminData?.email,
+                subject: "Two Factor Code.",
+                text: `Your Two Factor Authentication code is ${code}.`,
+              };
+          
+              transporter.sendMail(mailOptions, function (error, info) {
+                if (error) {
+                  console.log(error);
+                } else {
+                  console.log("Email sent: " + info.response);
+                  db.admins.update({
+                    code
+                  }, {
+                    where: {
+                      id: adminData?.id
+                    }
+                  }).then(()=> {
+                    res.status(200).send({success: true, message: "Two Factor Code is Sent To Your Email." });
+                  })
+                }
+              });
+            }
           } else {
-            res.send(errorHandler[500])
+            let tokens = await createToken(adminData);
+            if (!tokens?.not_created && !tokens.error) {
+              res.status(200).send({
+                adminId: adminData?.id,
+                adminEmail: adminData?.email,
+                firstName: adminData?.firstName,
+                lastName: adminData?.lastName,
+                tokens: tokens,
+                ...adminData
+              });
+            } else if (tokens?.not_created) {
+              res.send(errorHandler[400])
+            } else if (tokens?.error) {
+              res.send(errorHandler[503])
+            } else {
+              res.send(errorHandler[500])
+            }
           }
         } else {
           res.send(errorHandler[401])
@@ -159,6 +196,81 @@ exports.login = async (req, res, next) => {
   } catch (err) {
     console.log("error", err);
     res.send(errorHandler["503"])
+  }
+};
+
+exports.verifyTwoFactor = async (req, res, next) => {
+  try {
+    let { code } = req?.body;
+    console.log("...admin two factor...")
+    let adminData = await db.admins.findOne({
+      where: {
+        code
+      }
+    })
+    console.log("------[verifyTwoFactor]--------{adminData}--------", adminData)
+    if(adminData){
+      let tokens = await createToken(adminData);
+      if (!tokens?.not_created && !tokens.error) {
+        await db.admins.update({
+          code: null
+        }, {
+          where: {
+            id: adminData?.id
+          }
+        })
+        res.status(200).send({
+          adminId: adminData?.id,
+          adminEmail: adminData?.email,
+          firstName: adminData?.firstName,
+          lastName: adminData?.lastName,
+          tokens: tokens,
+          ...adminData
+        });
+      } else if (tokens?.not_created) {
+        res.send(errorHandler[400])
+      } else if (tokens?.error) {
+        res.send(errorHandler[503])
+      } else {
+        res.send(errorHandler[500])
+      }
+    } else {
+      res.send(errorHandler[400])
+    }
+  } catch (err) {
+    console.log("error", err);
+    res.send(errorHandler[503])
+  }
+};
+
+exports.updateTwoFactorStatus = async (req, res, next) => {
+  try {
+    let { id } = req?.user;
+    let userData = await db.admins.findOne({
+      where: {
+        id
+      }
+    })
+    if(userData){
+      let updateStatus = await db.admins.update({
+        twoFactorEnabled: adminData?.twoFactorEnabled ? false : true
+      },
+      {
+        where: {
+          id
+        }
+      })
+      if(updateStatus[0] > 0){
+        res.status(200).send({ success: true, message: "Two Factor Status Updated." })
+      } else {
+        res.send(errorHandler[400])
+      }
+    } else {
+      res.send(errorHandler[400])
+    }
+  } catch (err) {
+    console.log("error", err);
+    res.send(errorHandler[503])
   }
 };
 
