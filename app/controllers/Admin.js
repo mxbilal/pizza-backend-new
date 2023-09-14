@@ -253,7 +253,7 @@ exports.updateTwoFactorStatus = async (req, res, next) => {
     })
     if(userData){
       let updateStatus = await db.admins.update({
-        twoFactorEnabled: adminData?.twoFactorEnabled ? false : true
+        twoFactorEnabled: userData?.twoFactorEnabled ? false : true
       },
       {
         where: {
