@@ -5,10 +5,6 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.STRING,
         allowNull: true
       },
-      varientId: {
-        type: Sequelize.STRING,
-        allowNull: true
-      },
       isDeleted: {
         type: Sequelize.BOOLEAN,
         defaultValue: false,

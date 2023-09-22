@@ -1,28 +1,16 @@
-const { body, query  } = require('express-validator')
 const joi = require("joi");
-exports.productPayload = [ 
-  body('name', 'Product Name dose not exist.').exists(),
-  body('description', 'Please Provide Description').exists()
-]   
-
-exports.updateProductPayload = [ 
-  body('id', 'id is required').exists()
-]
-
-exports.deleteProductPayload = [ 
-  query('id', 'id is required').exists()
-]
-
 exports.createCategoryPayload = joi.object({
   productId: joi.number().required(), 
   type: joi.string().trim(true).required(),
-  prize: joi.string().trim(true).required()
+  prize: joi.string().trim(true).required(),
+  images: joi.array()
 });
 
 exports.updateCategoryPayload = joi.object({
   id: joi.number().required(),
   type: joi.string().trim(true),
-  prize: joi.string().trim(true)
+  prize: joi.string().trim(true),
+  images: joi.array()
 });
 
 exports.deleteCategoryPayload = joi.object({

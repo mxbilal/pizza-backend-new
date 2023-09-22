@@ -1,17 +1,20 @@
 module.exports = (sequelize, Sequelize) => {
   const varients = sequelize.define("varients", 
     {
-      name: {
+      type: {
         type: Sequelize.STRING,
-        allowNull: true
+        allowNull: true,
+        defaultValue: null
       },
       description: {
         type: Sequelize.STRING,
-        allowNull: true
+        allowNull: true,
+        defaultValue: null
       },
-      pizzaId: {
+      prize: {
         type: Sequelize.STRING,
-        allowNull: true
+        allowNull: true,
+        defaultValue: null
       },
       isDeleted: {
         type: Sequelize.BOOLEAN,

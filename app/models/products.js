@@ -13,10 +13,6 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.STRING,
         allowNull: true
       },
-      categoryId: {
-        type: Sequelize.STRING,
-        allowNull: true
-      },
       isDeleted: {
         type: Sequelize.BOOLEAN,
         defaultValue: false,
