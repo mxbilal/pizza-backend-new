@@ -312,5 +312,77 @@ module.exports = {
         res.status(503).send({ success: false, message: "Internal Server Error." });
       }
     }
+  },
+  extra:{
+    cheese:{
+      async get(req, res){
+        try {
+          let products = await db.cheese.findAll();
+          if(products?.length)
+            res.status(200).send({ success: true, data: products })
+          else 
+            res.status(200).send({ success: false, message: "Data not found.", data: products })
+        } catch (err) {
+          console.log("error", err);
+          res.status(503).send({ success: false, message: "Internal Server Error." });
+        }
+      }
+    },
+    crust_type:{
+      async get(req, res){
+        try {
+          let products = await db.crust_type.findAll();
+          if(products?.length)
+            res.status(200).send({ success: true, data: products })
+          else 
+            res.status(200).send({ success: false, message: "Data not found.", data: products })
+        } catch (err) {
+          console.log("error", err);
+          res.status(503).send({ success: false, message: "Internal Server Error." });
+        }
+      }
+    },
+    sauce:{
+      async get(req, res){
+        try {
+          let products = await db.sauce.findAll();
+          if(products?.length)
+            res.status(200).send({ success: true, data: products })
+          else 
+            res.status(200).send({ success: false, message: "Data not found.", data: products })
+        } catch (err) {
+          console.log("error", err);
+          res.status(503).send({ success: false, message: "Internal Server Error." });
+        }
+      }
+    },
+    toppings:{
+      async get(req, res){
+        try {
+          let products = await db.toppings.findAll();
+          if(products?.length)
+            res.status(200).send({ success: true, data: products })
+          else 
+            res.status(200).send({ success: false, message: "Data not found.", data: products })
+        } catch (err) {
+          console.log("error", err);
+          res.status(503).send({ success: false, message: "Internal Server Error." });
+        }
+      }
+    },
+    veggies:{
+      async get(req, res){
+        try {
+          let products = await db.veggies.findAll();
+          if(products?.length)
+            res.status(200).send({ success: true, data: products })
+          else 
+            res.status(200).send({ success: false, message: "Data not found.", data: products })
+        } catch (err) {
+          console.log("error", err);
+          res.status(503).send({ success: false, message: "Internal Server Error." });
+        }
+      }
+    },
   }
 }

@@ -21,6 +21,13 @@ db.categories = require("./category")(sequelizeInstance, Sequelize);
 db.products = require("./products")(sequelizeInstance, Sequelize);
 db.varients = require("./varients")(sequelizeInstance, Sequelize);
 db.images = require("./images")(sequelizeInstance, Sequelize);
+//extra
+db.cheese = require('./Extra/cheese')(sequelizeInstance,Sequelize)
+db.crust_type = require('./Extra/crustType')(sequelizeInstance,Sequelize)
+db.sauce = require('./Extra/sauce')(sequelizeInstance,Sequelize)
+db.toppings = require('./Extra/toppings')(sequelizeInstance,Sequelize)
+db.veggies = require('./Extra/veggies')(sequelizeInstance,Sequelize)
+
 /************************ *********************/
 db.Sequelize = Sequelize;
 db.sequelize = sequelizeInstance;
