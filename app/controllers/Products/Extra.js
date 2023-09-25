@@ -60,72 +60,72 @@ module.exports = {
 
   cheese: {
     async get(req, res) {
-      await performCRUD('cheese', 'get', req, res);
+      await extraCRUD('cheese', 'get', req, res);
     },
     async create(req, res) {
-      await performCRUD('cheese', 'create', req, res);
+      await extraCRUD('cheese', 'create', req, res);
     },
     async update(req, res) {
-      await performCRUD('cheese', 'update', req, res);
+      await extraCRUD('cheese', 'update', req, res);
     },
     async delete(req, res) {
-      await performCRUD('cheese', 'delete', req, res);
+      await extraCRUD('cheese', 'delete', req, res);
     },
   },
   crust_type: {
     async get(req, res) {
-      await performCRUD('crust_type', 'get', req, res);
+      await extraCRUD('crust_type', 'get', req, res);
     },
     async create(req, res) {
-      await performCRUD('crust_type', 'create', req, res);
+      await extraCRUD('crust_type', 'create', req, res);
     },
     async update(req, res) {
-      await performCRUD('crust_type', 'update', req, res);
+      await extraCRUD('crust_type', 'update', req, res);
     },
     async delete(req, res) {
-      await performCRUD('crust_type', 'delete', req, res);
+      await extraCRUD('crust_type', 'delete', req, res);
     },
   },
   sauce: {
     async get(req, res) {
-      await performCRUD('sauce', 'get', req, res);
+      await extraCRUD('sauce', 'get', req, res);
     },
     async create(req, res) {
-      await performCRUD('sauce', 'create', req, res);
+      await extraCRUD('sauce', 'create', req, res);
     },
     async update(req, res) {
-      await performCRUD('sauce', 'update', req, res);
+      await extraCRUD('sauce', 'update', req, res);
     },
     async delete(req, res) {
-      await performCRUD('sauce', 'delete', req, res);
+      await extraCRUD('sauce', 'delete', req, res);
     },
   },
   toppings: {
     async get(req, res) {
-      await performCRUD('toppings', 'get', req, res);
+      await extraCRUD('toppings', 'get', req, res);
     },
     async create(req, res) {
-      await performCRUD('toppings', 'create', req, res);
+      await extraCRUD('toppings', 'create', req, res);
     },
     async update(req, res) {
-      await performCRUD('toppings', 'update', req, res);
+      await extraCRUD('toppings', 'update', req, res);
     },
     async delete(req, res) {
-      await performCRUD('toppings', 'delete', req, res);
+      await extraCRUD('toppings', 'delete', req, res);
     },
   },
   veggies: {
     async get(req, res) {
-      await performCRUD('veggies', 'get', req, res);
+      await extraCRUD('veggies', 'get', req, res);
     },
     async create(req, res) {
-      await performCRUD('veggies', 'create', req, res);
+      await extraCRUD('veggies', 'create', req, res);
     },
     async update(req, res) {
-      await performCRUD('veggies', 'update', req, res);
+      await extraCRUD('veggies', 'update', req, res);
     },
     async delete(req, res) {
-      await performCRUD('veggies', 'delete', req, res);
+      await extraCRUD('veggies', 'delete', req, res);
     },
   },
 }
