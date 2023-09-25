@@ -1,62 +1,63 @@
 const db = require('../../models')
-module.exports = {
-  async extraCRUD(model, action, req, res) {
-    try {
-      switch (action) {
-        case 'get':
-          const products = await db[model].findAll();
-          if (products?.length)
-            res.status(200).send({ success: true, data: products });
-          else
-            res.status(200).send({ success: false, message: "Data not found.", data: products });
-          break;
-        case 'create':
-          const { name, price } = req?.body;
-          const addedItem = await db[model].create({ name, price });
-          if (addedItem?.dataValues) {
-            console.log("added", addedItem?.dataValues);
-            res.status(200).send({ success: true, message: `${model} Added.` });
-          } else {
-            console.log("something went wrong.");
-            res.status(400).send({ success: false, message: `Could not Add ${model}.` });
-          }
-          break;
-        case 'update':
-          const { id:updateId } = req?.body;
-          const updatedItem = await db[model].update(req?.body, {
-            where: { updateId }
-          });
-          if (updatedItem[0] > 0) {
-            console.log(`updated${model}`, updatedItem);
-            res.status(200).send({ success: true, message: `${model} Updated.` });
-          } else {
-            console.log("something went wrong.");
-            res.status(400).send({ success: false, message: `Could not Update ${model}.` });
-          }
-          break;
-        case 'delete':
-          const { id: deleteId } = req?.query;
-          const deletedItem = await db[model].update({
-            isDeleted: true
-          }, {
-            where: { deleteId }
-          });
-          if (deletedItem[0] > 0) {
-            console.log(`deleted${model}`, deletedItem);
-            res.status(200).send({ success: true, message: `${model} Deleted.` });
-          } else {
-            console.log("something went wrong.");
-            res.status(400).send({ success: false, message: `Could not Delete ${model}.` });
-          }
-          break;
-        default:
-          res.status(400).send({ success: false, message: "Invalid action." });
-      }
-    } catch (err) {
-      console.log("error", err);
-      res.status(500).send({ success: false, message: "Internal Server Error." });
+
+async function extraCRUD(model, action, req, res) {
+  try {
+    switch (action) {
+      case 'get':
+        const products = await db[model].findAll();
+        if (products?.length)
+          res.status(200).send({ success: true, data: products });
+        else
+          res.status(200).send({ success: false, message: "Data not found.", data: products });
+        break;
+      case 'create':
+        const { name, price } = req?.body;
+        const addedItem = await db[model].create({ name, price });
+        if (addedItem?.dataValues) {
+          console.log("added", addedItem?.dataValues);
+          res.status(200).send({ success: true, message: `${model} Added.` });
+        } else {
+          console.log("something went wrong.");
+          res.status(400).send({ success: false, message: `Could not Add ${model}.` });
+        }
+        break;
+      case 'update':
+        const { id:updateId } = req?.body;
+        const updatedItem = await db[model].update(req?.body, {
+          where: { updateId }
+        });
+        if (updatedItem[0] > 0) {
+          console.log(`updated${model}`, updatedItem);
+          res.status(200).send({ success: true, message: `${model} Updated.` });
+        } else {
+          console.log("something went wrong.");
+          res.status(400).send({ success: false, message: `Could not Update ${model}.` });
+        }
+        break;
+      case 'delete':
+        const { id: deleteId } = req?.query;
+        const deletedItem = await db[model].update({
+          isDeleted: true
+        }, {
+          where: { deleteId }
+        });
+        if (deletedItem[0] > 0) {
+          console.log(`deleted${model}`, deletedItem);
+          res.status(200).send({ success: true, message: `${model} Deleted.` });
+        } else {
+          console.log("something went wrong.");
+          res.status(400).send({ success: false, message: `Could not Delete ${model}.` });
+        }
+        break;
+      default:
+        res.status(400).send({ success: false, message: "Invalid action." });
     }
-  },
+  } catch (err) {
+    console.log("error", err);
+    res.status(500).send({ success: false, message: "Internal Server Error." });
+  }
+}
+module.exports = {
 
   cheese: {
     async get(req, res) {
