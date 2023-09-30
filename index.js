@@ -11,7 +11,7 @@ app.use(bodyParser.json());
 
 
 const db = require('./app/models/index');
-const adminRoutes = require('./app/routes/Admin')
+const adminRoutes = require('./app/routes/admin')
 const SuperAdminRoutes = require("./app/routes/SuperAdmin")
 const products = require("./app/routes/products")
 const userRoutes = require('./app/routes/user')

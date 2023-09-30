@@ -51,6 +51,8 @@ exports.login = async (req, res, next) => {
           let tokens = await createToken(adminData);
           if (!tokens?.not_created && !tokens.error) {
             res.status(200).send({
+              success:true,
+              message:"Login Attempt successful",
               adminId: adminData?.id,
               adminEmail: adminData?.email,
               firstName: adminData?.firstName,
