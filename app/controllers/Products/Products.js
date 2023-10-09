@@ -9,7 +9,7 @@ module.exports = {
         if (addedProduct?.dataValues) {
           console.log("added", addedProduct?.dataValues);
           
-          res.status(200).send({ success: true, message: "Product Added." });
+          res.status(200).send({ success: true, message: "Product Added.",data:addedProduct?.dataValues ??[] });
           
         } else {
           console.log("something went wrong.");
@@ -56,6 +56,16 @@ module.exports = {
           where: {
             isDeleted: false
           }
+          // include: [
+          //   {
+          //     model: db.varients, // Include the variants table
+          //     as: 'variants', // Specify the alias for the variants table
+          //   },
+          //   {
+          //     model: db.category, // Include the category table
+          //     as: 'category', // Specify the alias for the category table
+          //   },
+          // ],
         });
         if(products?.length)
           res.status(200).send({ success: true, data: products })
@@ -93,35 +103,19 @@ module.exports = {
       }
     },
   },
-  varients: {
+  variants: {
     async create(req, res){
       try {
-        const { error, value } = createCategoryPayload.validate(req.body)
-        if (!error) {
-          console.log("payload", value)
-          let addedCategory = await db.varients.create(value);
+          let addedCategory = await db.varients.create(req?.body);
           if (addedCategory?.dataValues) {
-            console.log("added", addedCategory?.dataValues);
-            if(value?.images?.length){
-              let imagePayload = value?.images?.map?.(img => {
-                return {
-                  varientId: addedCategory?.dataValues?.id,
-                  name: img
-                }
-              })
-              await db.images.bulkCreate(imagePayload)
-            }
             res.status(200).send({ success: true, message: "Varrient Added." });
-            
-          } else {
+            }
+           else {
             console.log("something went wrong.");
             res
               .status(400)
               .send({ success: false, message: "Could not Add Varient." });
           }
-        }
-        else
-          res.status(422).json({success: false, errors: error.message})
       } catch (err) {
         console.log("error", err);
         res.status(503).send({ success: false, message: "Internal Server Error." });
@@ -196,11 +190,7 @@ module.exports = {
     },
     async get(req, res){
       try {
-        const { error, value: {perPage, pageNo} } = getCategoryPayload.validate(req.query);
-        if(!error){
           let categories = await db.varients.findAll({
-            offset: (parseInt(pageNo) - 1)  * parseInt(perPage),
-            limit: parseInt(perPage),
             where: {
               isDeleted: false
             },
@@ -212,7 +202,6 @@ module.exports = {
             res.status(200).send({ success: true, data: categories })
           else 
             res.status(200).send({ success: false, message: "Data not found.", data: categories })
-        } else res.status(422).json({success: false, errors: error.message})
       } catch (err) {
         console.log("error", err);
         res.status(503).send({ success: false, message: "Internal Server Error." });

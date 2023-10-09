@@ -12,10 +12,10 @@ router.post("/pizza", products.pizzas.create);
 router.put("/pizza", products.pizzas.update);
 router.delete("/pizza", products.pizzas.delete);
 
-router.get("/varient", products.varients.get);
-router.post("/varient", products.varients.create);
-router.put("/varient", products.varients.update);
-router.delete("/varient", products.varients.delete);
+router.get("/variants", products.variants.get);
+router.post("/variants", products.variants.create);
+router.put("/variants", products.variants.update);
+router.delete("/variants", products.variants.delete);
 
 router.get("/category", products.categories.get);
 router.post("/category", products.categories.create);

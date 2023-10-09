@@ -11,7 +11,12 @@ module.exports = (sequelize, Sequelize) => {
         allowNull: true,
         defaultValue: null
       },
-      prize: {
+      price: {
+        type: Sequelize.STRING,
+        allowNull: true,
+        defaultValue: null
+      },
+      productId: {
         type: Sequelize.STRING,
         allowNull: true,
         defaultValue: null
